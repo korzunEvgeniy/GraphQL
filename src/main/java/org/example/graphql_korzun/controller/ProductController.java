@@ -7,6 +7,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
 import java.math.BigDecimal;
@@ -23,39 +24,52 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @QueryMapping(name = "allProducts")
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    @SchemaMapping(typeName = "Query", field = "product")
+    public ProductOperations product() {
+        return new ProductOperations();
     }
 
-    @QueryMapping(name = "productById")
-    public Product getProductById(@Argument UUID id) {
-        return productService.getProductById(id);
+    @SchemaMapping(typeName = "Mutation", field = "product")
+    public ProductOperations productMutation() {
+        return new ProductOperations();
     }
 
-    @MutationMapping(name = "addProduct")
-    public Product createProduct(
-            @Argument String name,
-            @Argument BigDecimal price,
-            @Argument Integer stock,
-            @Argument UUID categoryId) {
-        return productService.createProduct(name, price, stock, categoryId);
-    }
+    public class ProductOperations {
 
-    @MutationMapping(name = "updateProduct")
-    public Product updateProduct(
-            @Argument UUID id,
-            @Argument String name,
-            @Argument BigDecimal price,
-            @Argument Integer stock,
-            @Argument UUID categoryId) {
-        return productService.updateProduct(id, name, price, stock, categoryId);
-    }
+        @QueryMapping
+        public List<Product> allProducts() {
+            return productService.getAllProducts();
+        }
 
-    @MutationMapping(name = "deleteProduct")
-    public Boolean deleteProduct(@Argument UUID id) {
-        productService.deleteProduct(id);
-        return true;
+        @QueryMapping
+        public Product productById(@Argument UUID id) {
+            return productService.getProductById(id);
+        }
+
+        @MutationMapping
+        public Product addProduct(
+                @Argument String name,
+                @Argument BigDecimal price,
+                @Argument Integer stock,
+                @Argument UUID categoryId) {
+            return productService.createProduct(name, price, stock, categoryId);
+        }
+
+        @MutationMapping
+        public Product updateProduct(
+                @Argument UUID id,
+                @Argument String name,
+                @Argument BigDecimal price,
+                @Argument Integer stock,
+                @Argument UUID categoryId) {
+            return productService.updateProduct(id, name, price, stock, categoryId);
+        }
+
+        @MutationMapping
+        public Boolean deleteProduct(@Argument UUID id) {
+            productService.deleteProduct(id);
+            return true;
+        }
     }
 
     @BatchMapping(field = "category", typeName = "Product")
